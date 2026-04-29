@@ -12,11 +12,25 @@
 <body>
   <main class="app">
     <h1>Τριλιζά</h1>
+
+    <div class="scores">
+      <div>X: <span id="scoreX">0</span></div>
+      <div>O: <span id="scoreO">0</span></div>
+    </div>
+
     <p id="status">Παίζει: X</p>
 
     <div class="board" id="board" aria-label="Board"></div>
 
-    <button id="resetBtn">Νέο παιχνίδι</button>
+    <div class="buttons">
+      <button id="newGameBtn">Νέα παρτίδα</button>
+      <button id="resetScoreBtn">Reset Score</button>
+    </div>
+
+    <div id="updateBanner" class="update-banner hidden">
+      <span>Υπάρχει νέα έκδοση.</span>
+      <button id="updateBtn">Ενημέρωση</button>
+    </div>
   </main>
 
   <script src="app.js"></script>
