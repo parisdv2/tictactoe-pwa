@@ -15,14 +15,9 @@ let scoreO = 0;
 let waitingWorker = null;
 
 const winningCombos = [
-  [0, 1, 2],
-  [3, 4, 5],
-  [6, 7, 8],
-  [0, 3, 6],
-  [1, 4, 7],
-  [2, 5, 8],
-  [0, 4, 8],
-  [2, 4, 6]
+  [0,1,2],[3,4,5],[6,7,8],
+  [0,3,6],[1,4,7],[2,5,8],
+  [0,4,8],[2,4,6]
 ];
 
 function updateScores() {
@@ -47,7 +42,7 @@ function updateStatus(message) {
 }
 
 function checkWinner() {
-  for (const [a, b, c] of winningCombos) {
+  for (const [a,b,c] of winningCombos) {
     if (board[a] && board[a] === board[b] && board[a] === board[c]) {
       return board[a];
     }
@@ -98,10 +93,9 @@ resetScoreBtn.addEventListener("click", resetScore);
 
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("sw.js").then((reg) => {
-    if (reg.waiting) {
-      waitingWorker = reg.waiting;
-      updateBanner.classList.remove("hidden");
-    }
+    waitingWorker = reg.waiting || null;
+
+    if (waitingWorker) updateBanner.classList.remove("hidden");
 
     reg.addEventListener("updatefound", () => {
       const newWorker = reg.installing;
@@ -126,3 +120,5 @@ updateBtn.addEventListener("click", () => {
     waitingWorker.postMessage({ type: "SKIP_WAITING" });
   }
 });
+
+newGame();
