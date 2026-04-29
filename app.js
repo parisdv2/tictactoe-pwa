@@ -1,10 +1,18 @@
 const boardEl = document.getElementById("board");
 const statusEl = document.getElementById("status");
-const resetBtn = document.getElementById("resetBtn");
+const newGameBtn = document.getElementById("newGameBtn");
+const resetScoreBtn = document.getElementById("resetScoreBtn");
+const scoreXEl = document.getElementById("scoreX");
+const scoreOEl = document.getElementById("scoreO");
+const updateBanner = document.getElementById("updateBanner");
+const updateBtn = document.getElementById("updateBtn");
 
 let board = Array(9).fill("");
 let currentPlayer = "X";
 let gameActive = true;
+let scoreX = 0;
+let scoreO = 0;
+let waitingWorker = null;
 
 const winningCombos = [
   [0, 1, 2],
@@ -16,6 +24,11 @@ const winningCombos = [
   [0, 4, 8],
   [2, 4, 6]
 ];
+
+function updateScores() {
+  scoreXEl.textContent = scoreX;
+  scoreOEl.textContent = scoreO;
+}
 
 function renderBoard() {
   boardEl.innerHTML = "";
@@ -49,6 +62,9 @@ function handleMove(index) {
   const result = checkWinner();
 
   if (result === "X" || result === "O") {
+    if (result === "X") scoreX++;
+    if (result === "O") scoreO++;
+    updateScores();
     updateStatus(`Νικητής: ${result}`);
     gameActive = false;
   } else if (result === "draw") {
@@ -62,7 +78,7 @@ function handleMove(index) {
   renderBoard();
 }
 
-function resetGame() {
+function newGame() {
   board = Array(9).fill("");
   currentPlayer = "X";
   gameActive = true;
@@ -70,6 +86,43 @@ function resetGame() {
   renderBoard();
 }
 
-resetBtn.addEventListener("click", resetGame);
+function resetScore() {
+  scoreX = 0;
+  scoreO = 0;
+  updateScores();
+  newGame();
+}
 
-resetGame();
+newGameBtn.addEventListener("click", newGame);
+resetScoreBtn.addEventListener("click", resetScore);
+
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("sw.js").then((reg) => {
+    if (reg.waiting) {
+      waitingWorker = reg.waiting;
+      updateBanner.classList.remove("hidden");
+    }
+
+    reg.addEventListener("updatefound", () => {
+      const newWorker = reg.installing;
+      if (!newWorker) return;
+
+      newWorker.addEventListener("statechange", () => {
+        if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
+          waitingWorker = newWorker;
+          updateBanner.classList.remove("hidden");
+        }
+      });
+    });
+  });
+
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    window.location.reload();
+  });
+}
+
+updateBtn.addEventListener("click", () => {
+  if (waitingWorker) {
+    waitingWorker.postMessage({ type: "SKIP_WAITING" });
+  }
+});
